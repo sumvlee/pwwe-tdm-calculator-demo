@@ -1,0 +1,5 @@
+example_id,display_label,drug,stage,preconception_seizure_free_9m,preconception_daily_dose_mg,preconception_target_trough_ug_ml,current_daily_dose_mg,current_trough_ug_ml,n_prior_tdm,source_note
+EX-LEV-01,"LEV example, low baseline risk",LEV,T3,Yes,1000,12.11,1500,4.26,2,Synthetic deidentified example anchored to observed ranges; no patient names or source IDs retained.
+EX-LEV-02,"LEV example, high baseline risk",LEV,T1,No,1000,13.55,1000,5.27,2,Synthetic deidentified example anchored to observed ranges; no patient names or source IDs retained.
+EX-LTG-03,"LTG example, low baseline risk",LTG,T1,Yes,100,4.94,100,2.06,2,Synthetic deidentified example anchored to observed ranges; no patient names or source IDs retained.
+EX-LTG-04,"LTG example, high baseline risk",LTG,T2,No,125,5.28,250,1.12,2,Synthetic deidentified example anchored to observed ranges; no patient names or source IDs retained.

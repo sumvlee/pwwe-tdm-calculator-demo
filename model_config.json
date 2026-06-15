@@ -1,0 +1,131 @@
+{
+  "app_name": "PWWE TDM-guided ASM dosing calculator prototype",
+  "model_version": "Stan popPK v202606 + MAP shrinkage prototype v20260611",
+  "drug_settings": {
+    "LEV": {
+      "rtc_cutoff": 0.54,
+      "minimum_preconception_gate_ug_ml": 13.62,
+      "dose_cap_mg_day": 2500,
+      "dose_increment_mg_day": 250
+    },
+    "LTG": {
+      "rtc_cutoff": 0.71,
+      "minimum_preconception_gate_ug_ml": 5.28,
+      "dose_cap_mg_day": 300,
+      "dose_increment_mg_day": 25
+    }
+  },
+  "stan_stage_multipliers": {
+    "LEV": {
+      "T1": {
+        "multiplier": 1.68,
+        "percent_change": 68.16,
+        "multiplier_q5": 1.42,
+        "multiplier_q95": 1.97
+      },
+      "T2": {
+        "multiplier": 1.58,
+        "percent_change": 57.9,
+        "multiplier_q5": 1.35,
+        "multiplier_q95": 1.84
+      },
+      "T3": {
+        "multiplier": 1.78,
+        "percent_change": 77.66,
+        "multiplier_q5": 1.52,
+        "multiplier_q95": 2.06
+      }
+    },
+    "LTG": {
+      "T1": {
+        "multiplier": 1.52,
+        "percent_change": 52.15,
+        "multiplier_q5": 1.28,
+        "multiplier_q95": 1.8
+      },
+      "T2": {
+        "multiplier": 2.16,
+        "percent_change": 116.18,
+        "multiplier_q5": 1.79,
+        "multiplier_q95": 2.58
+      },
+      "T3": {
+        "multiplier": 2.08,
+        "percent_change": 107.88,
+        "multiplier_q5": 1.74,
+        "multiplier_q95": 2.46
+      }
+    }
+  },
+  "map_population_multipliers": {
+    "LEV": {
+      "high": {
+        "T1": {
+          "multiplier": 2.45,
+          "percent_change": 144.8
+        },
+        "T2": {
+          "multiplier": 2.19,
+          "percent_change": 118.9
+        },
+        "T3": {
+          "multiplier": 2.84,
+          "percent_change": 184.2
+        }
+      },
+      "low": {
+        "T1": {
+          "multiplier": 2.25,
+          "percent_change": 124.8
+        },
+        "T2": {
+          "multiplier": 2.07,
+          "percent_change": 106.9
+        },
+        "T3": {
+          "multiplier": 2.6,
+          "percent_change": 159.9
+        }
+      }
+    },
+    "LTG": {
+      "high": {
+        "T1": {
+          "multiplier": 1.54,
+          "percent_change": 54.4
+        },
+        "T2": {
+          "multiplier": 2.46,
+          "percent_change": 145.6
+        },
+        "T3": {
+          "multiplier": 2.25,
+          "percent_change": 124.8
+        }
+      },
+      "low": {
+        "T1": {
+          "multiplier": 1.42,
+          "percent_change": 41.8
+        },
+        "T2": {
+          "multiplier": 2.32,
+          "percent_change": 132.1
+        },
+        "T3": {
+          "multiplier": 2.06,
+          "percent_change": 105.6
+        }
+      }
+    }
+  },
+  "risk_model_display_coefficients": {
+    "intercept": -0.6222017373772264,
+    "high_baseline_risk": 0.9980276263467939,
+    "exposure_deficit": 0.11568703374651855,
+    "interaction_high_risk_x_deficit": 0.5882618807701738,
+    "drug_LTG": 0.48598562235878257,
+    "note": "Compact prototype calibration to saved Bayesian posterior mean risks; not a standalone validated prediction model."
+  },
+  "map_shrinkage_rule": "log(MAP CL ratio) = (1-w)*log(population stage multiplier) + w*log(observed CL ratio), w=n_TDM/(n_TDM+2)."
+}
