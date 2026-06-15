@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PWWE TDM-guided ASM dosing calculator</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div>
+      <p class="eyebrow">Static supplementary demo</p>
+      <h1>PWWE TDM-guided ASM dosing calculator</h1>
+      <p class="subtitle">
+        A browser-only demonstration of Stan popPK stage priors combined with MAP updating from measured trough concentrations.
+        No patient data are uploaded; all calculations run locally in the browser.
+      </p>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="panel input-panel" aria-label="Input form">
+      <h2>Inputs</h2>
+      <label>
+        Deidentified example
+        <select id="example"></select>
+      </label>
+
+      <div class="grid two">
+        <label>
+          Drug
+          <select id="drug">
+            <option value="LEV">LEV</option>
+            <option value="LTG">LTG</option>
+          </select>
+        </label>
+        <label>
+          Stage
+          <select id="stage">
+            <option value="T1">T1</option>
+            <option value="T2">T2</option>
+            <option value="T3">T3</option>
+          </select>
+        </label>
+      </div>
+
+      <label>
+        Seizure-free for ≥9 months before pregnancy?
+        <select id="pre_seizure_free">
+          <option value="yes">Yes</option>
+          <option value="no">No</option>
+        </select>
+      </label>
+
+      <div class="grid two">
+        <label>
+          Preconception daily dose (mg/day)
+          <input id="pre_dose" type="number" min="1" step="25">
+        </label>
+        <label>
+          Preconception target trough (µg/mL)
+          <input id="target_conc" type="number" min="0.01" step="0.1">
+        </label>
+        <label>
+          Current daily dose (mg/day)
+          <input id="current_dose" type="number" min="1" step="25">
+        </label>
+        <label>
+          Current trough (µg/mL)
+          <input id="current_conc" type="number" min="0.01" step="0.1">
+        </label>
+        <label>
+          Prior pregnancy TDM measurements
+          <input id="n_tdm" type="number" min="0" step="1">
+        </label>
+      </div>
+    </section>
+
+    <section class="results" aria-live="polite">
+      <section class="panel">
+        <div class="panel-title">
+          <h2>Recommended output</h2>
+          <span id="risk-badge" class="badge">Risk stratum</span>
+        </div>
+        <div class="metrics">
+          <div class="metric">
+            <span>MAP-adjusted dose</span>
+            <strong id="candidate_dose">-</strong>
+          </div>
+          <div class="metric">
+            <span>Predicted RTC</span>
+            <strong id="predicted_rtc">-</strong>
+          </div>
+          <div class="metric">
+            <span>Predicted trough</span>
+            <strong id="predicted_conc">-</strong>
+          </div>
+          <div class="metric">
+            <span>Dose change vs current</span>
+            <strong id="candidate_change">-</strong>
+          </div>
+        </div>
+        <p id="action" class="action-text"></p>
+        <div id="warnings"></div>
+      </section>
+
+      <section class="panel">
+        <h2>Model trace</h2>
+        <div class="trace-grid">
+          <div>
+            <span>Stan popPK stage prior</span>
+            <strong id="stan_prior">-</strong>
+          </div>
+          <div>
+            <span>Observed CL ratio</span>
+            <strong id="observed_cl">-</strong>
+          </div>
+          <div>
+            <span>MAP-updated CL ratio</span>
+            <strong id="map_cl">-</strong>
+          </div>
+          <div>
+            <span>Shrinkage weight</span>
+            <strong id="shrinkage">-</strong>
+          </div>
+        </div>
+        <p id="trace_text" class="small"></p>
+      </section>
+
+      <section class="panel">
+        <h2>Clinical anchors</h2>
+        <div class="anchor-grid">
+          <div><span>Minimum preconception gate</span><strong id="min_gate">-</strong></div>
+          <div><span>RTC cut-off</span><strong id="rtc_cutoff">-</strong></div>
+          <div><span>Selected RTC goal</span><strong id="goal_rtc">-</strong></div>
+          <div><span>Model version</span><strong id="model_version">-</strong></div>
+        </div>
+        <p class="small">
+          This exploratory research demonstration is not a standalone prescribing tool.
+          Dose changes require clinical review and therapeutic drug monitoring confirmation.
+        </p>
+      </section>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
