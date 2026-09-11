@@ -4,145 +4,84 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>PWWE TDM-guided ASM dosing calculator</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=20260911">
+  <style>
+    button {font:inherit;cursor:pointer;padding:8px 12px;border:1px solid #cbd5e1;border-radius:6px;background:#fff;color:#172033;}
+    button:hover {background:#eef2ff;}
+    .history-row {border-top:1px solid #d9e1ec;padding-top:12px;margin-top:12px;}
+    .input-panel {position:static;}
+    .history-row .grid {grid-template-columns:1fr 1fr;}
+    details summary {cursor:pointer;font-weight:600;}
+    #input-error {color:#b91c1c;font-weight:600;}
+    #model_version {font-size:13px;line-height:1.5;overflow-wrap:anywhere;}
+    [hidden] {display:none!important;}
+  </style>
 </head>
 <body>
   <header class="site-header">
-    <div>
-      <p class="eyebrow">Static supplementary demo</p>
-      <h1>PWWE TDM-guided ASM dosing calculator</h1>
-      <p class="subtitle">
-        A browser-only demonstration of Stan popPK stage priors combined with MAP updating from measured trough concentrations.
-        No patient data are uploaded; all calculations run locally in the browser.
-      </p>
-    </div>
+    <p class="eyebrow">Research demonstration · Updated 11 September 2026</p>
+    <h1>PWWE TDM-guided ASM dosing calculator</h1>
+    <p class="subtitle">Independent sparse-TDM MAP updating with no absolute daily-dose ceiling. Risk-dependent dose steps and relative-increase rules are retained. All calculations run in your browser; inputs are not uploaded.</p>
   </header>
-
   <main class="layout">
     <section class="panel input-panel" aria-label="Input form">
       <h2>Inputs</h2>
-      <label>
-        Deidentified example
-        <select id="example"></select>
-      </label>
-
+      <label>Synthetic example<select id="example" disabled><option>Loading…</option></select></label>
       <div class="grid two">
-        <label>
-          Drug
-          <select id="drug">
-            <option value="LEV">LEV</option>
-            <option value="LTG">LTG</option>
-          </select>
-        </label>
-        <label>
-          Stage
-          <select id="stage">
-            <option value="T1">T1</option>
-            <option value="T2">T2</option>
-            <option value="T3">T3</option>
-          </select>
-        </label>
+        <label>Drug<select id="drug"><option>LEV</option><option>LTG</option></select></label>
+        <label>Stage<select id="stage"><option>T1</option><option>T2</option><option>T3</option></select></label>
       </div>
-
-      <label>
-        Seizure-free for ≥9 months before pregnancy?
-        <select id="pre_seizure_free">
-          <option value="yes">Yes</option>
-          <option value="no">No</option>
-        </select>
-      </label>
-
+      <label>Seizure-free for ≥9 months before pregnancy?<select id="pre_seizure_free"><option value="yes">Yes</option><option value="no">No</option></select></label>
       <div class="grid two">
-        <label>
-          Preconception daily dose (mg/day)
-          <input id="pre_dose" type="number" min="1" step="25">
-        </label>
-        <label>
-          Preconception target trough (µg/mL)
-          <input id="target_conc" type="number" min="0.01" step="0.1">
-        </label>
-        <label>
-          Current daily dose (mg/day)
-          <input id="current_dose" type="number" min="1" step="25">
-        </label>
-        <label>
-          Current trough (µg/mL)
-          <input id="current_conc" type="number" min="0.01" step="0.1">
-        </label>
-        <label>
-          Prior pregnancy TDM measurements
-          <input id="n_tdm" type="number" min="0" step="1">
-        </label>
+        <label>Preconception daily dose (mg/day)<input id="pre_dose" type="number" min="0" step="any"></label>
+        <label>Preconception target trough (µg/mL)<input id="target_conc" type="number" min="0" step="any"></label>
+        <label>Current daily dose (mg/day)<input id="current_dose" type="number" min="0" step="any"></label>
+        <label>Current trough (µg/mL)<input id="current_conc" type="number" min="0" step="any"></label>
       </div>
+      <p class="small">Use the dose corresponding to the preconception target trough. The current measurement is included once in the MAP update.</p>
+      <h2 style="margin-top:20px">Earlier TDM measurements</h2>
+      <p class="small">Optional. Enter actual earlier measurements from the same pregnancy and drug, using the same preconception reference. Do not repeat the current measurement or enter future visits.</p>
+      <div id="history"></div>
+      <button id="add-history" type="button">Add earlier measurement</button>
+      <p id="history-note" class="small" role="status"></p>
+      <p id="input-error" role="alert"></p>
     </section>
-
     <section class="results" aria-live="polite">
       <section class="panel">
-        <div class="panel-title">
-          <h2>Recommended output</h2>
-          <span id="risk-badge" class="badge">Risk stratum</span>
-        </div>
+        <div class="panel-title"><h2>Candidate-dose simulation</h2><span id="risk-badge" class="badge">Risk stratum</span></div>
         <div class="metrics">
-          <div class="metric">
-            <span>MAP-adjusted dose</span>
-            <strong id="candidate_dose">-</strong>
-          </div>
-          <div class="metric">
-            <span>Predicted RTC</span>
-            <strong id="predicted_rtc">-</strong>
-          </div>
-          <div class="metric">
-            <span>Predicted trough</span>
-            <strong id="predicted_conc">-</strong>
-          </div>
-          <div class="metric">
-            <span>Dose change vs current</span>
-            <strong id="candidate_change">-</strong>
-          </div>
+          <div class="metric"><span>Candidate daily dose</span><strong id="candidate_dose">—</strong></div>
+          <div class="metric"><span>Increase vs current</span><strong id="increment">—</strong></div>
+          <div class="metric"><span>Dose change vs current</span><strong id="candidate_change">—</strong></div>
+          <div class="metric"><span>Predicted RTC</span><strong id="predicted_rtc">—</strong></div>
         </div>
-        <p id="action" class="action-text"></p>
-        <div id="warnings"></div>
+        <p id="action" class="action-text"></p><div id="warnings"></div>
+        <p class="small">No absolute ceiling is applied. Relative-increase parameters (25% or 50%) and one- or two-step limits are applied before upward rounding. Predicted RTC is dose-proportional, not an observed post-adjustment concentration.</p>
       </section>
-
       <section class="panel">
-        <h2>Model trace</h2>
+        <h2>Independent MAP calculation</h2>
         <div class="trace-grid">
-          <div>
-            <span>Stan popPK stage prior</span>
-            <strong id="stan_prior">-</strong>
-          </div>
-          <div>
-            <span>Observed CL ratio</span>
-            <strong id="observed_cl">-</strong>
-          </div>
-          <div>
-            <span>MAP-updated CL ratio</span>
-            <strong id="map_cl">-</strong>
-          </div>
-          <div>
-            <span>Shrinkage weight</span>
-            <strong id="shrinkage">-</strong>
-          </div>
+          <div><span>MAP population CL ratio</span><strong id="population_cl">—</strong></div>
+          <div><span>Observed current CL ratio</span><strong id="observed_cl">—</strong></div>
+          <div><span>MAP-updated CL ratio</span><strong id="map_cl">—</strong></div>
+          <div><span>Measurements used</span><strong id="n_tdm_used">—</strong></div>
         </div>
         <p id="trace_text" class="small"></p>
       </section>
-
       <section class="panel">
-        <h2>Clinical anchors</h2>
+        <h2>Exposure boundaries</h2>
         <div class="anchor-grid">
-          <div><span>Minimum preconception gate</span><strong id="min_gate">-</strong></div>
-          <div><span>RTC cut-off</span><strong id="rtc_cutoff">-</strong></div>
-          <div><span>Selected RTC goal</span><strong id="goal_rtc">-</strong></div>
-          <div><span>Model version</span><strong id="model_version">-</strong></div>
+          <div><span>Drug-specific RTC threshold</span><strong id="rtc_cutoff">—</strong></div>
+          <div><span>Safety-margin RTC factor</span><strong id="goal_rtc">—</strong></div>
+          <div><span>Predicted trough</span><strong id="predicted_conc">—</strong></div>
+          <div><span>Model version</span><strong id="model_version">—</strong></div>
         </div>
-        <p class="small">
-          This exploratory research demonstration is not a standalone prescribing tool.
-          Dose changes require clinical review and therapeutic drug monitoring confirmation.
-        </p>
+        <p class="small">This exploratory research demonstration is not a standalone prescribing tool. Candidate doses require clinical review and repeat TDM. The exposure boundaries are not validated minimum effective concentrations.</p>
       </section>
+      <details class="panel"><summary>Separate Stan stage estimates</summary><p id="stan_context" class="small"></p><p class="small">Legacy population-stage estimates are shown only as context. They do not enter the independent MAP update or its candidate-dose calculation.</p></details>
     </section>
   </main>
-
-  <script src="app.js"></script>
+  <script src="engine.js?v=20260911"></script>
+  <script src="app.js?v=20260911"></script>
 </body>
 </html>
